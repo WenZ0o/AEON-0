@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AEON-0 // Autonomous Intelligence Workstation</title>
+<meta name="description" content="AEON-0 is an autonomous browser-based neural trading simulation: a living 3D intelligence core, synthetic market feed, decision pipeline and execution ledger." />
+<meta name="theme-color" content="#050304" />
+<meta property="og:title" content="AEON-0 // Autonomous Intelligence Workstation" />
+<meta property="og:description" content="A living neural core that converts synthetic market volatility into simulated autonomous trading decisions." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app">
+  <header class="brandbar">
+    <div class="brand-left">
+      <div class="sigil"></div>
+      <div>
+        <span class="brand-title">AEON-0 // AUTONOMOUS INTELLIGENCE WORKSTATION</span>
+        <span class="brand-sub">VOLATILITY METABOLISM / COGNITIVE EXECUTION ENGINE</span>
+      </div>
+    </div>
+    <div class="system-line">
+      <span><span class="live-dot"></span><b>CORE ONLINE</b></span>
+      <span>SESSION <b id="sessionClock">00:00:00</b></span>
+      <span>LATENCY <b id="latency">18 ms</b></span>
+      <span>MODE <b>SIMULATION</b></span>
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi"><div class="kpi-label">STARTING CAPITAL</div><div class="kpi-value">$150.00</div><div class="kpi-foot">SESSION GENESIS // LOCKED</div></div>
+    <div class="kpi"><div class="kpi-label">CURRENT EQUITY</div><div class="kpi-value" id="equityValue">$150.00</div><div class="kpi-foot" id="equityFoot">NO SETTLEMENTS YET</div></div>
+    <div class="kpi"><div class="kpi-label">TOTAL PROFIT</div><div class="kpi-value positive" id="profitValue">+$0.00</div><div class="kpi-foot" id="profitFoot">+0.00% SESSION RETURN</div></div>
+    <div class="kpi"><div class="kpi-label">WIN RATE</div><div class="kpi-value" id="winRateValue">0/0</div><div class="kpi-foot" id="winRateFoot">AWAITING EXECUTION DATA</div></div>
+  </section>
+
+  <main class="workspace">
+    <section class="panel" id="corePanel">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="panel-head">
+        <div><div class="eyebrow">INTELLIGENCE CORE / NODE A0</div><div class="panel-title">AEON-0 Intel Core</div></div>
+        <div class="panel-meta"><span id="coreState">ANALYZING MARKET...</span><br>NEURAL FABRIC // ADAPTIVE</div>
+      </div>
+      <div id="coreViewport">
+        <div class="core-grid"></div>
+        <div class="core-overlay">
+          <div class="core-status"><span class="pulse"></span><span id="statusFlicker">ANALYZING MARKET...</span></div>
+          <div class="identity-card">
+            <div class="identity-name">AEON-0 // THRESHOLD ENGINE</div>
+            <div class="identity-copy">An artificial organism that converts volatility into neural tension, risk decisions and simulated execution. It has no body. The network is the body.</div>
+          </div>
+          <div class="neural-meter">
+            <div class="meter-label">NEURAL TENSION</div>
+            <div class="meter-track"><div class="meter-fill" id="neuralFill"></div></div>
+            <div class="meter-value" id="neuralValue">28%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="rightColumn">
+      <section class="panel" id="marketPanel">
+        <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+        <div class="panel-head">
+          <div><div class="eyebrow">MARKET ACTION / SYNTHETIC FEED</div><div class="panel-title">AEON / USD</div></div>
+          <div class="panel-meta">COMPOSITE CRYPTO INDEX<br><span id="marketRegime">REGIME: CALM</span></div>
+        </div>
+        <div class="chart-wrap" id="chartWrap">
+          <canvas id="chartCanvas"></canvas>
+          <div class="chart-badge"><div class="chart-symbol">AEON / USD</div><div class="chart-price" id="chartPrice">$100.00</div><div class="chart-change positive" id="chartChange">+0.00%</div></div>
+          <div class="chart-right"><span id="volatilityReadout">VOL 0.18</span><br><span id="momentumReadout">MOM +0.00</span><br>LIVE / 140 MS</div>
+          <div class="hover-readout" id="hoverReadout"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="decisionPanel">
+        <div class="compact-head"><span class="compact-title">DECISION SEQUENCE</span><span class="panel-meta" id="decisionId">TRACE // IDLE</span></div>
+        <div class="decision-body">
+          <div class="sequence">
+            <div class="step" id="step0">SIGNAL</div><div class="arrow">→</div>
+            <div class="step" id="step1">RISK REVIEW</div><div class="arrow">→</div>
+            <div class="step" id="step2">POSITION SIZING</div><div class="arrow">→</div>
+            <div class="step" id="step3">EXECUTION</div>
+          </div>
+          <div class="decision-readout">
+            <div>SIGNAL <b id="dSignal">QUIET</b></div>
+            <div>RISK <b id="dRisk">0.32</b></div>
+            <div>BIAS <b id="dBias">NEUTRAL</b></div>
+            <div>CONFIDENCE <b id="dConf">--</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="ledgerPanel">
+        <div class="compact-head"><span class="compact-title">EXECUTION LEDGER</span><span class="panel-meta">LAST 5 SETTLED POSITIONS</span></div>
+        <div class="ledger-wrap">
+          <table>
+            <thead><tr><th style="width:12%">ID</th><th style="width:18%">ASSET</th><th style="width:18%">SIDE</th><th style="width:22%">CAPITAL</th><th style="width:15%">LEVERAGE</th><th style="width:15%">STATUS</th></tr></thead>
+            <tbody id="ledgerBody">
+              <tr><td class="trade-id">--</td><td>WAITING</td><td>--</td><td>$0.00</td><td>--</td><td>--</td></tr>
+              <tr><td class="trade-id">--</td><td>WAITING</td><td>--</td><td>$0.00</td><td>--</td><td>--</td></tr>
+              <tr><td class="trade-id">--</td><td>WAITING</td><td>--</td><td>$0.00</td><td>--</td><td>--</td></tr>
+              <tr><td class="trade-id">--</td><td>WAITING</td><td>--</td><td>$0.00</td><td>--</td><td>--</td></tr>
+              <tr><td class="trade-id">--</td><td>WAITING</td><td>--</td><td>$0.00</td><td>--</td><td>--</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span><strong>SIMULATED MARKET FEED // NO LIVE ORDERS</strong> · autonomous visual prototype · all balances are fictional</span>
+    <span id="audioHint">CLICK ONCE TO ARM AUDIO</span>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="js/00-base.js"></script>
+<script src="js/10-audio.js"></script>
+<script src="js/20-core.js"></script>
+<script src="js/30-market.js"></script>
+<script src="js/40-chart.js"></script>
+<script src="js/50-trading.js"></script>
+<script src="js/60-main.js"></script>
+</body>
+</html>
