@@ -1,4 +1,4 @@
-// ---------- THREE.JS INTELLIGENCE CORE V2 ----------
+// ---------- THREE.JS CORTICAL INTELLIGENCE CORE V3 ----------
   const coreViewport = $('coreViewport');
   if (typeof THREE === 'undefined') {
     coreViewport.innerHTML = '<div style="position:absolute;inset:0;display:grid;place-items:center;padding:30px;text-align:center;color:#ff7893;font:12px/1.7 monospace;letter-spacing:.08em">THREE.JS COULD NOT LOAD.<br>CHECK YOUR INTERNET CONNECTION OR OPEN THIS FILE IN CHROME/EDGE.</div>';
@@ -7,34 +7,42 @@
     throw new Error('Three.js failed to load from CDN');
   }
 
+  const LOGICAL_NEURAL_UNITS = 166500.54;
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x050305, .045);
+  scene.fog = new THREE.FogExp2(0x030203, .037);
 
-  const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
-  camera.position.set(0, 0.05, 7.15);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  camera.position.set(0, -.02, 7.45);
 
   const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.28;
   coreViewport.prepend(renderer.domElement);
 
   const coreGroup = new THREE.Group();
+  coreGroup.rotation.y = -.30;
   scene.add(coreGroup);
 
-  const ambient = new THREE.AmbientLight(0x5f1530, .44);
+  const ambient = new THREE.AmbientLight(0x64172d, .42);
   scene.add(ambient);
 
-  const keyLight = new THREE.PointLight(0xff315f, 7.2, 20, 2);
-  keyLight.position.set(2.7, 2.3, 4.4);
+  const keyLight = new THREE.PointLight(0xff3d67, 9.2, 22, 2);
+  keyLight.position.set(2.8, 2.8, 4.2);
   scene.add(keyLight);
 
-  const rimLight = new THREE.PointLight(0xa01745, 4.2, 18, 2);
-  rimLight.position.set(-3.8, -.8, 1.5);
+  const warmLight = new THREE.PointLight(0xffc27a, 5.2, 15, 2);
+  warmLight.position.set(-2.4, 1.6, 3.0);
+  scene.add(warmLight);
+
+  const rimLight = new THREE.PointLight(0x8d1035, 5.4, 18, 2);
+  rimLight.position.set(-4.2, -.6, 1.1);
   scene.add(rimLight);
 
-  const coreLight = new THREE.PointLight(0xff6d91, 3.2, 8, 2);
-  coreLight.position.set(0,0,.5);
+  const coreLight = new THREE.PointLight(0xffe0b0, 4.0, 8, 2);
+  coreLight.position.set(.15,.15,.4);
   scene.add(coreLight);
 
   function radialTexture(){
@@ -42,26 +50,42 @@
     const x=c.getContext('2d');
     const g=x.createRadialGradient(64,64,1,64,64,64);
     g.addColorStop(0,'rgba(255,255,255,1)');
-    g.addColorStop(.12,'rgba(255,214,224,1)');
-    g.addColorStop(.32,'rgba(255,88,126,.92)');
-    g.addColorStop(.62,'rgba(255,30,84,.28)');
+    g.addColorStop(.10,'rgba(255,239,213,1)');
+    g.addColorStop(.30,'rgba(255,113,143,.92)');
+    g.addColorStop(.58,'rgba(255,38,86,.30)');
     g.addColorStop(1,'rgba(255,0,70,0)');
     x.fillStyle=g; x.fillRect(0,0,128,128);
     return new THREE.CanvasTexture(c);
   }
   const glowTexture=radialTexture();
 
-  const OUTER_NODES = 260;
-  const INNER_NODES = 120;
-  const NUCLEUS_NODES = 44;
+  const OUTER_NODES = 920;
+  const INNER_NODES = 650;
+  const NUCLEUS_NODES = 230;
   const NODE_COUNT = OUTER_NODES + INNER_NODES + NUCLEUS_NODES;
   const baseNodes=[];
   const currentNodes=[];
+  const nodeRadials=[];
   const nodeLayer=[];
+
+  function cranialWarp(v, shell=1){
+    const ny=clamp(v.y,-1,1);
+    const lower=clamp((-ny-.18)/.82,0,1);
+    const crown=1 + Math.max(0,ny)*.10;
+    const temple=1 - Math.exp(-Math.pow((ny-.02)*3.2,2))*.055;
+    v.x*=1.60*crown*temple*(1-lower*.28);
+    v.y*=2.08;
+    v.z*=1.34*(1-lower*.18);
+    v.x += Math.sin(v.y*1.65)*.055*shell;
+    v.z += Math.exp(-Math.pow((v.y-.38)*1.65,2))*.12*shell;
+    if(v.y<-.85) v.z-=(-v.y-.85)*.16;
+    return v;
+  }
 
   function addBrainNode(v, layer){
     baseNodes.push(v);
     currentNodes.push(v.clone());
+    nodeRadials.push(v.clone().normalize());
     nodeLayer.push(layer);
   }
 
@@ -69,35 +93,38 @@
     const y=1-(i/(OUTER_NODES-1))*2;
     const r=Math.sqrt(Math.max(0,1-y*y));
     const theta=Math.PI*(3-Math.sqrt(5))*i;
-    const lobe=Math.sin(theta*1.7)*.085 + Math.sin(theta*3.1+y*2.2)*.045;
-    const hemi=Math.cos(theta)>=0?1:-1;
-    let x=Math.cos(theta)*r*(1.03+lobe)+hemi*.065;
-    let z=Math.sin(theta)*r*(.83+Math.cos(theta*2.3)*.045);
-    let yy=y*(.91+Math.sin(theta*.7)*.025)+Math.sin(theta*2.1)*.035;
-    const n=new THREE.Vector3(x*1.84,yy*1.7,z*1.68);
-    n.multiplyScalar(random(.91,1.08));
-    addBrainNode(n,0);
+    const ripple=Math.sin(theta*2.7+y*4.1)*.032 + Math.sin(theta*.73)*.018;
+    const v=new THREE.Vector3(
+      Math.cos(theta)*r*(1+ripple),
+      y,
+      Math.sin(theta)*r*(.96-ripple*.4)
+    );
+    cranialWarp(v,1);
+    v.multiplyScalar(random(.965,1.035));
+    addBrainNode(v,0);
   }
 
   for(let i=0;i<INNER_NODES;i++){
-    const v=new THREE.Vector3(normalRandom(),normalRandom()*.9,normalRandom()*.82).normalize();
-    const rad=Math.pow(Math.random(),.46)*1.48 + .16;
+    const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize();
+    const rad=Math.pow(Math.random(),.60)*.88 + .06;
     v.multiplyScalar(rad);
-    v.x*=1.04; v.y*=.92; v.z*=.9;
-    v.x += Math.sign(v.x || 1)*random(-.035,.07);
+    cranialWarp(v,.55);
+    v.multiplyScalar(.86);
     addBrainNode(v,1);
   }
 
   for(let i=0;i<NUCLEUS_NODES;i++){
     const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize();
-    v.multiplyScalar(random(.08,.7));
-    v.x*=1.15; v.y*=.9; v.z*=.85;
+    v.multiplyScalar(Math.pow(Math.random(),.52)*.58+.04);
+    v.x*=1.15; v.y*=1.12; v.z*=.95;
     addBrainNode(v,2);
   }
 
   const nodePositions=new Float32Array(NODE_COUNT*3);
   const nodeColors=new Float32Array(NODE_COUNT*3);
-  const cOuter=new THREE.Color(0xff315f), cInner=new THREE.Color(0xff6f91), cCore=new THREE.Color(0xffe5ec);
+  const cOuter=new THREE.Color(0xe92f5e);
+  const cInner=new THREE.Color(0xff7190);
+  const cCore=new THREE.Color(0xffddb0);
   for(let i=0;i<NODE_COUNT;i++){
     nodePositions[i*3]=baseNodes[i].x; nodePositions[i*3+1]=baseNodes[i].y; nodePositions[i*3+2]=baseNodes[i].z;
     const c=nodeLayer[i]===2?cCore:nodeLayer[i]===1?cInner:cOuter;
@@ -109,129 +136,167 @@
   nodeGeo.setAttribute('color',new THREE.BufferAttribute(nodeColors,3));
 
   const nodeMat=new THREE.PointsMaterial({
-    size:.082,map:glowTexture,transparent:true,opacity:.98,vertexColors:true,
+    size:.050,map:glowTexture,transparent:true,opacity:.94,vertexColors:true,
     blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
   });
   const nodeCloud=new THREE.Points(nodeGeo,nodeMat);
   coreGroup.add(nodeCloud);
 
   const haloMat=nodeMat.clone();
-  haloMat.size=.19; haloMat.opacity=.19; haloMat.vertexColors=true;
+  haloMat.size=.128; haloMat.opacity=.16;
   const haloCloud=new THREE.Points(nodeGeo,haloMat);
   coreGroup.add(haloCloud);
 
+  const HOT_COUNT=150;
+  const hotPositions=new Float32Array(HOT_COUNT*3);
+  const hotIndices=[];
+  for(let i=0;i<HOT_COUNT;i++){
+    const idx=Math.floor((i/HOT_COUNT)*NODE_COUNT + random(0,Math.max(1,NODE_COUNT/HOT_COUNT)))%NODE_COUNT;
+    hotIndices.push(idx);
+    hotPositions[i*3]=baseNodes[idx].x; hotPositions[i*3+1]=baseNodes[idx].y; hotPositions[i*3+2]=baseNodes[idx].z;
+  }
+  const hotGeo=new THREE.BufferGeometry();
+  hotGeo.setAttribute('position',new THREE.BufferAttribute(hotPositions,3));
+  const hotMat=new THREE.PointsMaterial({size:.11,map:glowTexture,color:0xffd49a,transparent:true,opacity:.80,blending:THREE.AdditiveBlending,depthWrite:false});
+  const hotCloud=new THREE.Points(hotGeo,hotMat);
+  coreGroup.add(hotCloud);
+
   const nucleusGroup=new THREE.Group(); coreGroup.add(nucleusGroup);
-  const nucleusMat=new THREE.MeshBasicMaterial({color:0xff315f,transparent:true,opacity:.11,blending:THREE.AdditiveBlending,depthWrite:false});
-  const nucleusMesh=new THREE.Mesh(new THREE.IcosahedronGeometry(.72,3),nucleusMat);
+  const nucleusMat=new THREE.MeshBasicMaterial({color:0xff315f,transparent:true,opacity:.08,blending:THREE.AdditiveBlending,depthWrite:false});
+  const nucleusMesh=new THREE.Mesh(new THREE.IcosahedronGeometry(.66,4),nucleusMat);
+  nucleusMesh.scale.set(1.28,1.0,.9);
   nucleusGroup.add(nucleusMesh);
   const nucleusWire=new THREE.Mesh(
-    new THREE.IcosahedronGeometry(.86,2),
-    new THREE.MeshBasicMaterial({color:0xff7897,wireframe:true,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false})
+    new THREE.IcosahedronGeometry(.82,3),
+    new THREE.MeshBasicMaterial({color:0xffc18a,wireframe:true,transparent:true,opacity:.13,blending:THREE.AdditiveBlending,depthWrite:false})
   );
+  nucleusWire.scale.set(1.22,1.0,.9);
   nucleusGroup.add(nucleusWire);
+
+  const coreGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color:0xff355f,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false}));
+  coreGlow.scale.set(2.8,2.8,1); coreGlow.position.set(.05,.05,.12);
+  nucleusGroup.add(coreGlow);
 
   const edges=[];
   const edgeSeen=new Set();
   function addEdge(a,b){
-    if(a===b) return;
+    if(a===b || a<0 || b<0 || a>=NODE_COUNT || b>=NODE_COUNT) return;
     const x=Math.min(a,b),y=Math.max(a,b),key=x+'_'+y;
     if(!edgeSeen.has(key)){edgeSeen.add(key);edges.push([x,y]);}
   }
 
-  for(let i=0;i<NODE_COUNT;i++){
-    const neighbors=[];
-    for(let j=0;j<NODE_COUNT;j++){
-      if(i===j) continue;
-      neighbors.push({j,d:baseNodes[i].distanceToSquared(baseNodes[j])});
-    }
-    neighbors.sort((a,b)=>a.d-b.d);
-    const neighborCount=nodeLayer[i]===2?9:nodeLayer[i]===1?7:6;
-    for(let k=0;k<neighborCount;k++) addEdge(i,neighbors[k].j);
+  const shellOffsets=[1,2,13,34];
+  for(let i=0;i<OUTER_NODES;i++){
+    shellOffsets.forEach(o=>addEdge(i,(i+o)%OUTER_NODES));
+    if(i%3===0) addEdge(i,(i+89)%OUTER_NODES);
   }
-
-  for(let n=0;n<180;n++){
+  for(let i=0;i<INNER_NODES;i++){
+    const idx=OUTER_NODES+i;
+    addEdge(idx,OUTER_NODES+((i+1)%INNER_NODES));
+    addEdge(idx,OUTER_NODES+((i+17)%INNER_NODES));
+    addEdge(idx,OUTER_NODES+((i+53)%INNER_NODES));
+    addEdge(idx,(i*7)%OUTER_NODES);
+    if(i%2===0) addEdge(idx,(i*13+71)%OUTER_NODES);
+  }
+  for(let i=0;i<NUCLEUS_NODES;i++){
+    const idx=OUTER_NODES+INNER_NODES+i;
+    addEdge(idx,OUTER_NODES+INNER_NODES+((i+1)%NUCLEUS_NODES));
+    addEdge(idx,OUTER_NODES+INNER_NODES+((i+11)%NUCLEUS_NODES));
+    addEdge(idx,OUTER_NODES+(i*3)%INNER_NODES);
+    addEdge(idx,(i*19)%OUTER_NODES);
+  }
+  for(let n=0;n<620;n++){
     const a=Math.floor(random(0,NODE_COUNT));
-    let b=Math.floor(random(0,NODE_COUNT));
-    let guard=0;
-    while((b===a || baseNodes[a].distanceTo(baseNodes[b])<1.05) && guard++<12) b=Math.floor(random(0,NODE_COUNT));
+    const b=Math.floor(random(0,NODE_COUNT));
     addEdge(a,b);
   }
 
   const edgePositions=new Float32Array(edges.length*6);
   const edgeGeo=new THREE.BufferGeometry();
   edgeGeo.setAttribute('position',new THREE.BufferAttribute(edgePositions,3));
-  const edgeMat=new THREE.LineBasicMaterial({color:0xdb3762,transparent:true,opacity:.29,blending:THREE.AdditiveBlending,depthWrite:false});
+  const edgeMat=new THREE.LineBasicMaterial({color:0xd63b61,transparent:true,opacity:.19,blending:THREE.AdditiveBlending,depthWrite:false});
   const edgeLines=new THREE.LineSegments(edgeGeo,edgeMat);
   coreGroup.add(edgeLines);
 
-  const shellGeo=new THREE.IcosahedronGeometry(2.28,3);
-  const shellMat=new THREE.MeshBasicMaterial({color:0x8d2140,wireframe:true,transparent:true,opacity:.045,blending:THREE.AdditiveBlending,depthWrite:false});
-  const shell=new THREE.Mesh(shellGeo,shellMat);
-  shell.scale.set(1.02,.91,.88);
-  coreGroup.add(shell);
+  const arcGroup=new THREE.Group(); coreGroup.add(arcGroup);
+  for(let i=0;i<18;i++){
+    const a=baseNodes[Math.floor(random(0,OUTER_NODES))].clone();
+    const b=baseNodes[Math.floor(random(0,OUTER_NODES))].clone();
+    const mid=a.clone().add(b).multiplyScalar(.5).normalize().multiplyScalar(random(2.25,3.05));
+    mid.y+=random(-.35,.55);
+    const curve=new THREE.CatmullRomCurve3([a,mid,b]);
+    const pts=curve.getPoints(42);
+    const geo=new THREE.BufferGeometry().setFromPoints(pts);
+    const mat=new THREE.LineBasicMaterial({color:i%4===0?0xffbd83:0xb5264c,transparent:true,opacity:i%4===0?.18:.08,blending:THREE.AdditiveBlending,depthWrite:false});
+    const line=new THREE.Line(geo,mat);
+    arcGroup.add(line);
+  }
+
+  const AURA_COUNT=720;
+  const auraPos=new Float32Array(AURA_COUNT*3);
+  for(let i=0;i<AURA_COUNT;i++){
+    const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize().multiplyScalar(random(2.2,3.7));
+    v.y*=.85;
+    auraPos[i*3]=v.x; auraPos[i*3+1]=v.y; auraPos[i*3+2]=v.z;
+  }
+  const auraGeo=new THREE.BufferGeometry(); auraGeo.setAttribute('position',new THREE.BufferAttribute(auraPos,3));
+  const auraMat=new THREE.PointsMaterial({size:.035,map:glowTexture,color:0xb72752,transparent:true,opacity:.32,blending:THREE.AdditiveBlending,depthWrite:false});
+  const auraCloud=new THREE.Points(auraGeo,auraMat); coreGroup.add(auraCloud);
 
   const ringGroup=new THREE.Group(); coreGroup.add(ringGroup);
-  for(let i=0;i<5;i++){
-    const ringGeo=new THREE.TorusGeometry(2.42+i*.085,.007+(i===2?.003:0),5,190);
-    const ringMat=new THREE.MeshBasicMaterial({
-      color:i===2?0xff6787:(i%2?0x9b2042:0x5e1730),
-      transparent:true,opacity:i===2?.29:.11+(i*.012),blending:THREE.AdditiveBlending,depthWrite:false
-    });
+  for(let i=0;i<3;i++){
+    const ringGeo=new THREE.TorusGeometry(2.50+i*.10,.005,4,220);
+    const ringMat=new THREE.MeshBasicMaterial({color:i===1?0xff815f:0x6c1630,transparent:true,opacity:i===1?.13:.065,blending:THREE.AdditiveBlending,depthWrite:false});
     const ring=new THREE.Mesh(ringGeo,ringMat);
-    ring.rotation.set(.25+i*.52,.15+i*.79,.22+i*.43);
-    ring.scale.set(1,1-random(.02,.12),1);
+    ring.rotation.set(.55+i*.69,.25+i*.82,.32+i*.57);
+    ring.scale.set(1,1-random(.06,.16),1);
     ringGroup.add(ring);
   }
 
   const shardGroup=new THREE.Group(); coreGroup.add(shardGroup);
-  for(let i=0;i<28;i++){
-    const g=new THREE.TetrahedronGeometry(random(.055,.15),0);
-    const m=new THREE.MeshBasicMaterial({
-      color:i%4===0?0xff7c9a:(i%3===0?0xff315f:0x8f2142),
-      transparent:true,opacity:random(.12,.48),wireframe:Math.random()>.36,
-      blending:THREE.AdditiveBlending,depthWrite:false
-    });
+  for(let i=0;i<34;i++){
+    const g=new THREE.TetrahedronGeometry(random(.035,.11),0);
+    const m=new THREE.MeshBasicMaterial({color:i%5===0?0xffbd83:(i%3===0?0xff315f:0x8f2142),transparent:true,opacity:random(.10,.38),wireframe:true,blending:THREE.AdditiveBlending,depthWrite:false});
     const s=new THREE.Mesh(g,m);
-    const dir=new THREE.Vector3(normalRandom(),normalRandom()*.75,normalRandom()).normalize().multiplyScalar(random(2.25,3.05));
+    const dir=new THREE.Vector3(normalRandom(),normalRandom()*.78,normalRandom()).normalize().multiplyScalar(random(2.35,3.35));
     s.position.copy(dir); s.rotation.set(random(0,3),random(0,3),random(0,3));
-    s.userData.spin=random(-.018,.018); s.userData.baseScale=random(.7,1.2);
+    s.userData.spin=random(-.012,.012);
     shardGroup.add(s);
   }
 
-  const signalGeom=new THREE.SphereGeometry(.034,8,8);
-  const signalMat=new THREE.MeshBasicMaterial({color:0xffd6df,transparent:true,opacity:.98,blending:THREE.AdditiveBlending,depthWrite:false});
+  const signalGeom=new THREE.SphereGeometry(.028,7,7);
+  const signalMat=new THREE.MeshBasicMaterial({color:0xffdfc0,transparent:true,opacity:.98,blending:THREE.AdditiveBlending,depthWrite:false});
   const neuralSignals=[];
   const marketImpulses=[];
 
   function spawnNeuralSignal(edgeIndex,energy=1){
-    if(neuralSignals.length>120) return;
+    if(neuralSignals.length>210 || !edges.length) return;
     const mesh=new THREE.Mesh(signalGeom,signalMat.clone());
-    mesh.material.color.set(energy>1.25?0xffffff:(energy>.8?0xff9db2:0xff527a));
-    mesh.scale.setScalar(.7+energy*.3);
+    mesh.material.color.set(energy>1.25?0xffffff:(energy>.8?0xffd0a0:0xff5c7c));
+    mesh.scale.setScalar(.65+energy*.32);
     coreGroup.add(mesh);
-    neuralSignals.push({mesh,edgeIndex,t:0,speed:random(.010,.024)*(1+energy*.42),reverse:Math.random()>.5});
+    neuralSignals.push({mesh,edgeIndex:edgeIndex%edges.length,t:0,speed:random(.011,.028)*(1+energy*.42),reverse:Math.random()>.5});
   }
 
-  const impulseGeom=new THREE.SphereGeometry(.052,9,9);
+  const impulseGeom=new THREE.SphereGeometry(.046,8,8);
   function spawnMarketImpulse(magnitude,sign){
     const targetIndex=Math.floor(random(0,NODE_COUNT));
     const end=currentNodes[targetIndex].clone();
     const dir=end.clone().normalize();
-    const tangent=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize().multiplyScalar(random(.35,1.2));
-    const start=dir.multiplyScalar(random(4.5,5.3)).add(tangent);
-    const mat=new THREE.MeshBasicMaterial({color:sign>=0?0xffc0ce:0xff274f,transparent:true,opacity:.96,blending:THREE.AdditiveBlending,depthWrite:false});
+    const tangent=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize().multiplyScalar(random(.35,1.15));
+    const start=dir.multiplyScalar(random(4.5,5.25)).add(tangent);
+    const mat=new THREE.MeshBasicMaterial({color:sign>=0?0xffd4a0:0xff274f,transparent:true,opacity:.96,blending:THREE.AdditiveBlending,depthWrite:false});
     const mesh=new THREE.Mesh(impulseGeom,mat); mesh.position.copy(start); coreGroup.add(mesh);
-    marketImpulses.push({mesh,start,end,targetIndex,t:0,speed:random(.024,.043),energy:clamp(magnitude*10,.7,2.2)});
+    marketImpulses.push({mesh,start,end,targetIndex,t:0,speed:random(.025,.045),energy:clamp(magnitude*10,.7,2.2)});
   }
 
-  let neuralTension=.31;
-  let burstEnergy=.08;
+  let neuralTension=.34;
+  let burstEnergy=.10;
   function fireNeuralBurst(energy){
     burstEnergy=Math.max(burstEnergy,energy);
-    neuralTension=clamp(neuralTension+energy*.105,0,1);
-    const count=Math.round(8+energy*18);
+    neuralTension=clamp(neuralTension+energy*.095,0,1);
+    const count=Math.round(12+energy*26);
     for(let i=0;i<count;i++) spawnNeuralSignal(Math.floor(random(0,edges.length)),energy);
-    if(energy>.72) playNeuralTick(clamp(energy/2,0,1));
   }
 
   function resizeCore(){
