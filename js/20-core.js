@@ -1,110 +1,74 @@
-// ---------- THREE.JS CORTICAL PORTRAIT CORE V4 ----------
+// ---------- THREE.JS NEURAL PORTRAIT CORE V5 ----------
 const coreViewport = $('coreViewport');
 
 if (typeof THREE === 'undefined') {
   coreViewport.innerHTML = '<div style="position:absolute;inset:0;display:grid;place-items:center;padding:30px;text-align:center;color:#ff7893;font:12px/1.7 monospace;letter-spacing:.08em">THREE.JS COULD NOT LOAD.<br>CHECK YOUR INTERNET CONNECTION OR OPEN THIS FILE IN CHROME/EDGE.</div>';
   $('coreState').textContent = 'RENDERER OFFLINE';
-  $('coreState').style.color = '#ff5f75';
-  throw new Error('Three.js failed to load from CDN');
+  throw new Error('Three.js failed to load');
 }
 
 const LOGICAL_NEURAL_UNITS = 166500.54;
-
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x020102, .032);
+scene.fog = new THREE.FogExp2(0x020102,.020);
 
-const camera = new THREE.PerspectiveCamera(40, 1, .1, 100);
-camera.position.set(0, .02, 7.7);
+const camera = new THREE.PerspectiveCamera(39,1,.1,100);
+camera.position.set(0,0,7.4);
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  alpha: true,
-  powerPreference: 'high-performance'
-});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
+const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.22;
 coreViewport.prepend(renderer.domElement);
 
-const coreGroup = new THREE.Group();
-coreGroup.rotation.set(.02, -.66, -.015);
+const coreGroup=new THREE.Group();
+coreGroup.rotation.set(.01,-.10,0);
 scene.add(coreGroup);
 
-scene.add(new THREE.AmbientLight(0x4a0f25, .28));
-
-const keyLight = new THREE.PointLight(0xff4c72, 6.2, 18, 2);
-keyLight.position.set(3.2, 2.5, 4.6);
-scene.add(keyLight);
-
-const warmLight = new THREE.PointLight(0xffbd74, 4.4, 16, 2);
-warmLight.position.set(-2.6, 1.8, 3.4);
-scene.add(warmLight);
-
-const rimLight = new THREE.PointLight(0x8b1236, 3.0, 18, 2);
-rimLight.position.set(-4.4, -.4, 1.2);
-scene.add(rimLight);
+scene.add(new THREE.AmbientLight(0x3b0b1c,.42));
+const keyLight=new THREE.PointLight(0xff6a74,5.4,18,2); keyLight.position.set(-2.6,2.0,4.5); scene.add(keyLight);
+const warmLight=new THREE.PointLight(0xffbd72,5.0,15,2); warmLight.position.set(1.6,1.9,3.6); scene.add(warmLight);
+const rimLight=new THREE.PointLight(0x8d1738,3.6,18,2); rimLight.position.set(3.4,-.5,1.8); scene.add(rimLight);
 
 function radialTexture(){
-  const c=document.createElement('canvas');
-  c.width=128;c.height=128;
+  const c=document.createElement('canvas'); c.width=128;c.height=128;
   const x=c.getContext('2d');
   const g=x.createRadialGradient(64,64,1,64,64,64);
   g.addColorStop(0,'rgba(255,255,255,1)');
-  g.addColorStop(.10,'rgba(255,236,205,.96)');
-  g.addColorStop(.28,'rgba(255,137,159,.84)');
-  g.addColorStop(.58,'rgba(255,42,91,.22)');
+  g.addColorStop(.12,'rgba(255,232,194,.98)');
+  g.addColorStop(.32,'rgba(255,118,137,.82)');
+  g.addColorStop(.62,'rgba(255,42,91,.22)');
   g.addColorStop(1,'rgba(255,0,70,0)');
   x.fillStyle=g;x.fillRect(0,0,128,128);
   return new THREE.CanvasTexture(c);
 }
 const glowTexture=radialTexture();
 
-function gauss(v,c,w){
-  const q=(v-c)/w;
-  return Math.exp(-q*q);
+const outline2D=[
+  [-.10,1.70],[-.55,1.58],[-.88,1.34],[-1.05,1.00],[-1.08,.70],
+  [-.98,.48],[-1.05,.28],[-1.34,.06],[-1.03,-.02],[-.98,-.20],
+  [-1.10,-.31],[-.93,-.36],[-.88,-.56],[-.70,-.78],[-.42,-.98],
+  [-.18,-1.20],[.18,-1.28],[.52,-1.17],[.72,-.94],[.92,-.66],
+  [1.08,-.28],[1.14,.16],[1.12,.58],[1.00,.98],[.78,1.34],[.46,1.58]
+];
+
+function pointInPolygon(x,y,poly){
+  let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+    const hit=((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi+1e-9)+xi);
+    if(hit)inside=!inside;
+  }
+  return inside;
 }
 
-function sculptHead(v, shell=1){
-  const y=v.y;
-  const front=Math.max(0,v.z);
-  const lower=clamp((-y-.12)/.88,0,1);
-  const crown=1+Math.max(0,y)*.07;
+const FACE_NODES=1180;
+const BRAIN_NODES=420;
+const CORE_NODES=140;
+const NODE_COUNT=FACE_NODES+BRAIN_NODES+CORE_NODES;
 
-  v.x*=1.23*crown*(1-lower*.22);
-  v.y*=1.64;
-  v.z*=1.03*(1-lower*.12);
-
-  if(front>0){
-    const center=gauss(v.x,0,.34);
-    v.z += shell*center*(
-      .07*gauss(y,.62,.20) +
-      .16*gauss(y,.34,.18) +
-      .52*gauss(y,.08,.15) +
-      .13*gauss(y,-.28,.10) +
-      .24*gauss(y,-.66,.18)
-    );
-  }
-
-  if(y<-.48){
-    v.x*=.90;
-    v.z-=(-y-.48)*.10;
-  }
-
-  v.z += Math.max(0,y)*.025;
-  return v;
-}
-
-const SHELL_NODES=980;
-const BRAIN_NODES=520;
-const CORE_NODES=180;
-const NODE_COUNT=SHELL_NODES+BRAIN_NODES+CORE_NODES;
-
-const baseNodes=[];
-const currentNodes=[];
-const nodeRadials=[];
-const nodeLayer=[];
+const baseNodes=[],currentNodes=[],nodeRadials=[],nodeLayer=[];
 
 function addNode(v,layer){
   baseNodes.push(v);
@@ -113,69 +77,45 @@ function addNode(v,layer){
   nodeLayer.push(layer);
 }
 
-for(let i=0;i<SHELL_NODES;i++){
-  const y=1-(i/(SHELL_NODES-1))*2;
-  const r=Math.sqrt(Math.max(0,1-y*y));
-  const a=Math.PI*(3-Math.sqrt(5))*i;
-  const ripple=Math.sin(a*2.3+y*3.7)*.022+Math.sin(a*.81)*.011;
-  const v=new THREE.Vector3(
-    Math.cos(a)*r*(1+ripple),
-    y,
-    Math.sin(a)*r*(1-ripple*.25)
-  );
-  sculptHead(v,1);
-  v.multiplyScalar(random(.978,1.022));
-  addNode(v,0);
+let guard=0;
+while(baseNodes.length<FACE_NODES && guard++<200000){
+  const x=random(-1.30,1.14), y=random(-1.25,1.70);
+  if(!pointInPolygon(x,y,outline2D))continue;
+  const centerBias=1-Math.min(1,Math.sqrt((x*.72)*(x*.72)+(y*.53)*(y*.53))/1.55);
+  const z=normalRandom()*(.10+.24*centerBias);
+  addNode(new THREE.Vector3(x,y,z),0);
 }
 
 for(let i=0;i<BRAIN_NODES;i++){
-  const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize();
-  const rad=Math.pow(Math.random(),.56)*.78+.08;
-  v.multiplyScalar(rad);
-  sculptHead(v,.35);
-  v.y+=.22;
-  v.x*=.93;
-  v.z*=.90;
-  addNode(v,1);
+  const a=Math.random()*Math.PI*2;
+  const r=Math.sqrt(Math.random());
+  const x=.10+Math.cos(a)*r*.78;
+  const y=.58+Math.sin(a)*r*.73;
+  if(pointInPolygon(x,y,outline2D)){
+    addNode(new THREE.Vector3(x,y,normalRandom()*.34),1);
+  }else{
+    i--;
+  }
 }
 
 for(let i=0;i<CORE_NODES;i++){
-  const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize();
-  v.multiplyScalar(Math.pow(Math.random(),.54)*.42+.04);
-  v.x*=.9;
-  v.y*=1.12;
-  v.z*=.82;
-  v.y+=.28;
-  addNode(v,2);
+  const a=Math.random()*Math.PI*2;
+  const r=Math.pow(Math.random(),.55);
+  addNode(new THREE.Vector3(.06+Math.cos(a)*r*.42,.55+Math.sin(a)*r*.46,normalRandom()*.24),2);
 }
 
 const nodePositions=new Float32Array(NODE_COUNT*3);
 const nodeColors=new Float32Array(NODE_COUNT*3);
-
-const shellColor=new THREE.Color(0xb42b50);
-const shellWarm=new THREE.Color(0xe96a6d);
-const brainColor=new THREE.Color(0xff8c7e);
-const brainWarm=new THREE.Color(0xffc879);
-const coreColor=new THREE.Color(0xffe1ae);
+const cFace=new THREE.Color(0xd13d5f);
+const cFaceWarm=new THREE.Color(0xf07b6d);
+const cBrain=new THREE.Color(0xff9d72);
+const cCore=new THREE.Color(0xffddb0);
 
 for(let i=0;i<NODE_COUNT;i++){
   const p=baseNodes[i];
-  nodePositions[i*3]=p.x;
-  nodePositions[i*3+1]=p.y;
-  nodePositions[i*3+2]=p.z;
-
-  let c=shellColor;
-  if(nodeLayer[i]===0){
-    const frontness=clamp((p.z+.35)/1.8,0,1);
-    c=(frontness>.68 && Math.random()<.18)?shellWarm:shellColor;
-  }else if(nodeLayer[i]===1){
-    c=Math.random()<.36?brainWarm:brainColor;
-  }else{
-    c=coreColor;
-  }
-  nodeColors[i*3]=c.r;
-  nodeColors[i*3+1]=c.g;
-  nodeColors[i*3+2]=c.b;
+  nodePositions[i*3]=p.x;nodePositions[i*3+1]=p.y;nodePositions[i*3+2]=p.z;
+  let c=nodeLayer[i]===2?cCore:nodeLayer[i]===1?cBrain:(Math.random()<.16?cFaceWarm:cFace);
+  nodeColors[i*3]=c.r;nodeColors[i*3+1]=c.g;nodeColors[i*3+2]=c.b;
 }
 
 const nodeGeo=new THREE.BufferGeometry();
@@ -183,293 +123,152 @@ nodeGeo.setAttribute('position',new THREE.BufferAttribute(nodePositions,3));
 nodeGeo.setAttribute('color',new THREE.BufferAttribute(nodeColors,3));
 
 const nodeMat=new THREE.PointsMaterial({
-  size:.036,
-  map:glowTexture,
-  transparent:true,
-  opacity:.86,
-  vertexColors:true,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false,
-  sizeAttenuation:true
+  size:.047,map:glowTexture,transparent:true,opacity:.94,vertexColors:true,
+  blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true
 });
-const nodeCloud=new THREE.Points(nodeGeo,nodeMat);
-coreGroup.add(nodeCloud);
+const nodeCloud=new THREE.Points(nodeGeo,nodeMat);coreGroup.add(nodeCloud);
 
-const haloMat=nodeMat.clone();
-haloMat.size=.082;
-haloMat.opacity=.09;
-const haloCloud=new THREE.Points(nodeGeo,haloMat);
-coreGroup.add(haloCloud);
+const haloMat=nodeMat.clone();haloMat.size=.095;haloMat.opacity=.085;
+const haloCloud=new THREE.Points(nodeGeo,haloMat);coreGroup.add(haloCloud);
 
-const eyeSprite=new THREE.Sprite(new THREE.SpriteMaterial({
-  map:glowTexture,
-  color:0xffd491,
-  transparent:true,
-  opacity:.92,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-}));
-eyeSprite.position.set(.16,.28,1.08);
-eyeSprite.scale.set(.22,.22,1);
-coreGroup.add(eyeSprite);
-
-const eyeCore=new THREE.Sprite(new THREE.SpriteMaterial({
-  map:glowTexture,
-  color:0xffffff,
-  transparent:true,
-  opacity:.94,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-}));
-eyeCore.position.copy(eyeSprite.position);
-eyeCore.scale.set(.075,.075,1);
-coreGroup.add(eyeCore);
-
-const profilePts=[
-  new THREE.Vector3(0,1.48,.62),
-  new THREE.Vector3(0,1.12,.78),
-  new THREE.Vector3(0,.70,.90),
-  new THREE.Vector3(0,.34,.92),
-  new THREE.Vector3(0,.08,1.36),
-  new THREE.Vector3(0,-.10,.99),
-  new THREE.Vector3(0,-.30,1.08),
-  new THREE.Vector3(0,-.51,.96),
-  new THREE.Vector3(0,-.76,.88),
-  new THREE.Vector3(0,-1.03,.59),
-  new THREE.Vector3(0,-1.22,.18)
-];
-const profileCurve=new THREE.CatmullRomCurve3(profilePts);
-const profileGeo=new THREE.BufferGeometry().setFromPoints(profileCurve.getPoints(120));
-const profileMat=new THREE.LineBasicMaterial({
-  color:0xffc37a,
-  transparent:true,
-  opacity:.24,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-});
-const profileLine=new THREE.Line(profileGeo,profileMat);
-profileLine.position.x=.012;
-coreGroup.add(profileLine);
-
-const jawPts=[
-  new THREE.Vector3(-.03,-1.18,.12),
-  new THREE.Vector3(-.40,-1.06,.02),
-  new THREE.Vector3(-.72,-.82,-.06),
-  new THREE.Vector3(-.89,-.48,-.15)
-];
-const jawGeo=new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3(jawPts).getPoints(64));
-const jawLine=new THREE.Line(jawGeo,new THREE.LineBasicMaterial({
-  color:0xd44f64,transparent:true,opacity:.11,blending:THREE.AdditiveBlending,depthWrite:false
-}));
-coreGroup.add(jawLine);
-
-const edges=[];
-const edgeSeen=new Set();
+const edges=[],edgeSeen=new Set();
 function addEdge(a,b){
   if(a===b||a<0||b<0||a>=NODE_COUNT||b>=NODE_COUNT)return;
-  const x=Math.min(a,b),y=Math.max(a,b),key=x+'_'+y;
-  if(edgeSeen.has(key))return;
-  edgeSeen.add(key);
-  edges.push([x,y]);
+  const x=Math.min(a,b),y=Math.max(a,b),k=x+'_'+y;
+  if(edgeSeen.has(k))return;edgeSeen.add(k);edges.push([x,y]);
 }
-
 function connectLocal(start,count,samples,links,maxDist){
   for(let i=start;i<start+count;i++){
     const picks=[];
     for(let s=0;s<samples;s++){
-      const j=start+Math.floor(Math.random()*count);
-      if(j===i)continue;
+      const j=start+Math.floor(Math.random()*count); if(i===j)continue;
       const d=baseNodes[i].distanceToSquared(baseNodes[j]);
-      if(d<=maxDist*maxDist)picks.push({j,d});
+      if(d<maxDist*maxDist)picks.push({j,d});
     }
     picks.sort((a,b)=>a.d-b.d);
     for(let k=0;k<Math.min(links,picks.length);k++)addEdge(i,picks[k].j);
   }
 }
-connectLocal(0,SHELL_NODES,30,2,.58);
-connectLocal(SHELL_NODES,BRAIN_NODES,34,3,.54);
-connectLocal(SHELL_NODES+BRAIN_NODES,CORE_NODES,30,4,.48);
-
-for(let i=0;i<BRAIN_NODES;i+=3){
-  addEdge(SHELL_NODES+i,(i*7)%SHELL_NODES);
-}
-for(let i=0;i<CORE_NODES;i+=2){
-  addEdge(SHELL_NODES+BRAIN_NODES+i,SHELL_NODES+(i*5)%BRAIN_NODES);
-}
-for(let i=0;i<90;i++){
-  addEdge(
-    SHELL_NODES+Math.floor(Math.random()*BRAIN_NODES),
-    Math.floor(Math.random()*SHELL_NODES)
-  );
-}
+connectLocal(0,FACE_NODES,28,2,.27);
+connectLocal(FACE_NODES,BRAIN_NODES,32,3,.30);
+connectLocal(FACE_NODES+BRAIN_NODES,CORE_NODES,26,4,.27);
+for(let i=0;i<BRAIN_NODES;i+=3)addEdge(FACE_NODES+i,(i*17)%FACE_NODES);
+for(let i=0;i<CORE_NODES;i+=2)addEdge(FACE_NODES+BRAIN_NODES+i,FACE_NODES+(i*5)%BRAIN_NODES);
+for(let i=0;i<120;i++)addEdge(FACE_NODES+Math.floor(Math.random()*BRAIN_NODES),Math.floor(Math.random()*FACE_NODES));
 
 const edgePositions=new Float32Array(edges.length*6);
 const edgeGeo=new THREE.BufferGeometry();
 edgeGeo.setAttribute('position',new THREE.BufferAttribute(edgePositions,3));
 const edgeMat=new THREE.LineBasicMaterial({
-  color:0xc93458,
-  transparent:true,
-  opacity:.075,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
+  color:0xd94a62,transparent:true,opacity:.17,blending:THREE.AdditiveBlending,depthWrite:false
 });
-const edgeLines=new THREE.LineSegments(edgeGeo,edgeMat);
-coreGroup.add(edgeLines);
+const edgeLines=new THREE.LineSegments(edgeGeo,edgeMat);coreGroup.add(edgeLines);
 
 const warmEdges=[];
-for(let i=0;i<150;i++){
-  const a=SHELL_NODES+Math.floor(Math.random()*BRAIN_NODES);
-  let b=SHELL_NODES+Math.floor(Math.random()*BRAIN_NODES);
-  if(a===b)b=SHELL_NODES+((b-SHELL_NODES+13)%BRAIN_NODES);
-  warmEdges.push([a,b]);
+for(let i=0;i<190;i++){
+  const a=FACE_NODES+Math.floor(Math.random()*(BRAIN_NODES+CORE_NODES));
+  const b=FACE_NODES+Math.floor(Math.random()*(BRAIN_NODES+CORE_NODES));
+  if(a!==b)warmEdges.push([a,b]);
 }
 const warmPos=new Float32Array(warmEdges.length*6);
 const warmGeo=new THREE.BufferGeometry();
 warmGeo.setAttribute('position',new THREE.BufferAttribute(warmPos,3));
 const warmMat=new THREE.LineBasicMaterial({
-  color:0xffb56c,
-  transparent:true,
-  opacity:.08,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
+  color:0xffbd72,transparent:true,opacity:.13,blending:THREE.AdditiveBlending,depthWrite:false
 });
-const warmLines=new THREE.LineSegments(warmGeo,warmMat);
-coreGroup.add(warmLines);
+const warmLines=new THREE.LineSegments(warmGeo,warmMat);coreGroup.add(warmLines);
 
-const HOT_COUNT=52;
-const hotIndices=[];
-const hotPositions=new Float32Array(HOT_COUNT*3);
+function makeLine(points,color,opacity){
+  const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(p[0],p[1],p[2]||.18)));
+  const geo=new THREE.BufferGeometry().setFromPoints(curve.getPoints(100));
+  const mat=new THREE.LineBasicMaterial({color,transparent:true,opacity,blending:THREE.AdditiveBlending,depthWrite:false});
+  const line=new THREE.Line(geo,mat);coreGroup.add(line);return line;
+}
+
+const profileLine=makeLine([
+  [-.12,1.68,.12],[-.62,1.50,.15],[-.98,1.10,.18],[-1.02,.66,.19],
+  [-.97,.44,.20],[-1.31,.07,.22],[-1.02,-.02,.21],[-.96,-.20,.20],
+  [-1.08,-.31,.19],[-.91,-.38,.18],[-.86,-.58,.16],[-.67,-.79,.14],
+  [-.40,-.98,.12],[-.18,-1.18,.10]
+],0xffc884,.40);
+
+const browLine=makeLine([[-.86,.53,.24],[-.65,.59,.27],[-.42,.55,.27]],0xffb66c,.20);
+const eyeLine=makeLine([[-.76,.42,.28],[-.62,.38,.31],[-.48,.41,.29]],0xffd69a,.28);
+const lipLine=makeLine([[-1.01,-.18,.23],[-.90,-.20,.24],[-.81,-.18,.22]],0xff7b83,.18);
+const jawLine=makeLine([[-.84,-.58,.15],[-.55,-.84,.12],[-.18,-1.10,.10],[.30,-1.17,.06]],0xd94d61,.16);
+
+const eyeSprite=new THREE.Sprite(new THREE.SpriteMaterial({
+  map:glowTexture,color:0xffd183,transparent:true,opacity:.90,blending:THREE.AdditiveBlending,depthWrite:false
+}));
+eyeSprite.position.set(-.61,.40,.34);eyeSprite.scale.set(.16,.16,1);coreGroup.add(eyeSprite);
+
+const eyeCore=new THREE.Sprite(new THREE.SpriteMaterial({
+  map:glowTexture,color:0xffffff,transparent:true,opacity:.92,blending:THREE.AdditiveBlending,depthWrite:false
+}));
+eyeCore.position.copy(eyeSprite.position);eyeCore.scale.set(.050,.050,1);coreGroup.add(eyeCore);
+
+const HOT_COUNT=64,hotIndices=[],hotPositions=new Float32Array(HOT_COUNT*3);
 for(let i=0;i<HOT_COUNT;i++){
-  const idx=SHELL_NODES+Math.floor(Math.random()*(BRAIN_NODES+CORE_NODES));
+  const idx=FACE_NODES+Math.floor(Math.random()*(BRAIN_NODES+CORE_NODES));
   hotIndices.push(idx);
   const p=baseNodes[idx];
   hotPositions[i*3]=p.x;hotPositions[i*3+1]=p.y;hotPositions[i*3+2]=p.z;
 }
-const hotGeo=new THREE.BufferGeometry();
-hotGeo.setAttribute('position',new THREE.BufferAttribute(hotPositions,3));
+const hotGeo=new THREE.BufferGeometry();hotGeo.setAttribute('position',new THREE.BufferAttribute(hotPositions,3));
 const hotMat=new THREE.PointsMaterial({
-  size:.085,
-  map:glowTexture,
-  color:0xffc176,
-  transparent:true,
-  opacity:.66,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
+  size:.090,map:glowTexture,color:0xffc678,transparent:true,opacity:.70,
+  blending:THREE.AdditiveBlending,depthWrite:false
 });
-const hotCloud=new THREE.Points(hotGeo,hotMat);
-coreGroup.add(hotCloud);
+const hotCloud=new THREE.Points(hotGeo,hotMat);coreGroup.add(hotCloud);
 
-const arcGroup=new THREE.Group();
-coreGroup.add(arcGroup);
-for(let i=0;i<9;i++){
-  const a=baseNodes[SHELL_NODES+Math.floor(Math.random()*BRAIN_NODES)].clone();
-  const b=baseNodes[SHELL_NODES+Math.floor(Math.random()*BRAIN_NODES)].clone();
-  const mid=a.clone().add(b).multiplyScalar(.5);
-  mid.z+=random(.42,.92);
-  mid.y+=random(-.18,.32);
-  const curve=new THREE.CatmullRomCurve3([a,mid,b]);
+const arcGroup=new THREE.Group();coreGroup.add(arcGroup);
+for(let i=0;i<8;i++){
+  const a=baseNodes[FACE_NODES+Math.floor(Math.random()*BRAIN_NODES)].clone();
+  const b=baseNodes[FACE_NODES+Math.floor(Math.random()*BRAIN_NODES)].clone();
+  const mid=a.clone().add(b).multiplyScalar(.5);mid.z+=random(.45,.95);mid.y+=random(-.12,.28);
   const line=new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints(curve.getPoints(54)),
-    new THREE.LineBasicMaterial({
-      color:i%3===0?0xffbd73:0xa92a4d,
-      transparent:true,
-      opacity:i%3===0?.10:.045,
-      blending:THREE.AdditiveBlending,
-      depthWrite:false
-    })
+    new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3([a,mid,b]).getPoints(56)),
+    new THREE.LineBasicMaterial({color:i%3===0?0xffc777:0xaa2b4b,transparent:true,opacity:i%3===0?.14:.06,blending:THREE.AdditiveBlending,depthWrite:false})
   );
   arcGroup.add(line);
 }
 
-const DUST_COUNT=330;
-const dustPos=new Float32Array(DUST_COUNT*3);
-for(let i=0;i<DUST_COUNT;i++){
-  const v=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize().multiplyScalar(random(2.2,3.3));
-  v.y*=.88;
-  dustPos[i*3]=v.x;dustPos[i*3+1]=v.y;dustPos[i*3+2]=v.z;
-}
-const dustGeo=new THREE.BufferGeometry();
-dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
-const dustMat=new THREE.PointsMaterial({
-  size:.026,
-  map:glowTexture,
-  color:0x9c2344,
-  transparent:true,
-  opacity:.18,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-});
-const dustCloud=new THREE.Points(dustGeo,dustMat);
-coreGroup.add(dustCloud);
-
 const signalGeom=new THREE.SphereGeometry(.026,7,7);
-const signalMat=new THREE.MeshBasicMaterial({
-  color:0xffd9a6,
-  transparent:true,
-  opacity:.95,
-  blending:THREE.AdditiveBlending,
-  depthWrite:false
-});
-const neuralSignals=[];
-const marketImpulses=[];
+const signalMat=new THREE.MeshBasicMaterial({color:0xffd9a6,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false});
+const neuralSignals=[],marketImpulses=[];
 
 function spawnNeuralSignal(edgeIndex,energy=1){
-  if(neuralSignals.length>110||!edges.length)return;
+  if(neuralSignals.length>120||!edges.length)return;
   const mesh=new THREE.Mesh(signalGeom,signalMat.clone());
   mesh.material.color.set(energy>1.2?0xffffff:(energy>.75?0xffcf91:0xff6c83));
-  mesh.scale.setScalar(.62+energy*.25);
-  coreGroup.add(mesh);
-  neuralSignals.push({
-    mesh,
-    edgeIndex:edgeIndex%edges.length,
-    t:0,
-    speed:random(.012,.026)*(1+energy*.36),
-    reverse:Math.random()>.5
-  });
+  mesh.scale.setScalar(.62+energy*.25);coreGroup.add(mesh);
+  neuralSignals.push({mesh,edgeIndex:edgeIndex%edges.length,t:0,speed:random(.012,.026)*(1+energy*.36),reverse:Math.random()>.5});
 }
 
 const impulseGeom=new THREE.SphereGeometry(.043,8,8);
 function spawnMarketImpulse(magnitude,sign){
-  const targetIndex=SHELL_NODES+Math.floor(random(0,BRAIN_NODES+CORE_NODES));
+  const targetIndex=FACE_NODES+Math.floor(random(0,BRAIN_NODES+CORE_NODES));
   const end=currentNodes[targetIndex].clone();
   const dir=end.clone().normalize();
   const tangent=new THREE.Vector3(normalRandom(),normalRandom(),normalRandom()).normalize().multiplyScalar(random(.28,.86));
-  const start=dir.multiplyScalar(random(4.4,5.0)).add(tangent);
-  const mat=new THREE.MeshBasicMaterial({
-    color:sign>=0?0xffcf91:0xff355f,
-    transparent:true,
-    opacity:.88,
-    blending:THREE.AdditiveBlending,
-    depthWrite:false
-  });
-  const mesh=new THREE.Mesh(impulseGeom,mat);
-  mesh.position.copy(start);
-  coreGroup.add(mesh);
-  marketImpulses.push({
-    mesh,start,end,targetIndex,t:0,
-    speed:random(.025,.041),
-    energy:clamp(magnitude*10,.65,2.0)
-  });
+  const start=dir.multiplyScalar(random(4.2,4.9)).add(tangent);
+  const mat=new THREE.MeshBasicMaterial({color:sign>=0?0xffcf91:0xff355f,transparent:true,opacity:.88,blending:THREE.AdditiveBlending,depthWrite:false});
+  const mesh=new THREE.Mesh(impulseGeom,mat);mesh.position.copy(start);coreGroup.add(mesh);
+  marketImpulses.push({mesh,start,end,targetIndex,t:0,speed:random(.025,.041),energy:clamp(magnitude*10,.65,2.0)});
 }
 
-let neuralTension=.27;
-let burstEnergy=.06;
-
+let neuralTension=.34,burstEnergy=.07;
 function fireNeuralBurst(energy){
   burstEnergy=Math.max(burstEnergy,energy);
   neuralTension=clamp(neuralTension+energy*.082,0,1);
-  const count=Math.round(7+energy*18);
-  for(let i=0;i<count;i++){
-    spawnNeuralSignal(Math.floor(random(0,edges.length)),energy);
-  }
+  const count=Math.round(8+energy*19);
+  for(let i=0;i<count;i++)spawnNeuralSignal(Math.floor(random(0,edges.length)),energy);
 }
 
 function resizeCore(){
   const r=coreViewport.getBoundingClientRect();
   const w=Math.max(10,r.width),h=Math.max(10,r.height);
-  renderer.setSize(w,h,false);
-  camera.aspect=w/h;
-  camera.updateProjectionMatrix();
+  renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
 }
 window.addEventListener('resize',resizeCore);
 resizeCore();
