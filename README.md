@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://wenzo0o.github.io/AEON-0/"><strong>Launch AEON-0</strong></a>
+  <a href="https://wenz0o.github.io/AEON-0/"><strong>Launch AEON-0</strong></a>
 </p>
 
 AEON-0 is a browser-based audiovisual experiment that presents a synthetic trading system as a living digital organism.
