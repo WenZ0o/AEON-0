@@ -16,6 +16,7 @@
     --green:#8ff0ad;
     --red:#ff5f75;
     --amber:#e9bd75;
+    --warm:#ffc27a;
     --shadow:rgba(255,38,88,.16);
   }
 
@@ -54,7 +55,7 @@
   .system-line b{color:#d7c9ce;font-weight:600}
   .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 9px rgba(143,240,173,.65);margin-right:6px;vertical-align:middle}
 
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .kpis{display:grid;grid-template-columns:1.18fr repeat(4,1fr);gap:8px}
   .kpi{
     min-height:72px;padding:10px 12px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(18,8,12,.88),rgba(7,4,6,.9));
     position:relative;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.015),0 12px 34px rgba(0,0,0,.2)
@@ -63,6 +64,7 @@
   .kpi-label{font-size:9px;letter-spacing:.16em;color:var(--muted);margin-bottom:9px}
   .kpi-value{font-size:24px;line-height:1;font-weight:750;letter-spacing:-.04em;text-shadow:0 0 18px rgba(255,255,255,.04)}
   .kpi-foot{margin-top:7px;font-size:8px;color:var(--faint);letter-spacing:.08em}
+  .kpi-neural{background:radial-gradient(circle at 18% 18%,rgba(255,194,122,.10),transparent 46%),linear-gradient(180deg,rgba(22,8,12,.92),rgba(7,4,6,.94));border-color:#4e1d27}.kpi-neural::before{background:linear-gradient(var(--warm),var(--hot),transparent)}.kpi-neural .kpi-value{color:#ffd9a6;text-shadow:0 0 18px rgba(255,194,122,.16)}
   .positive{color:var(--green)!important}.negative{color:var(--red)!important}
 
   .workspace{min-height:0;display:grid;grid-template-columns:minmax(420px,.94fr) minmax(520px,1.06fr);gap:10px}
@@ -74,15 +76,19 @@
   .panel-meta{font-size:8px;letter-spacing:.1em;color:var(--muted);text-align:right;line-height:1.55}
 
   #corePanel{display:grid;grid-template-rows:52px 1fr;min-height:0}
-  #coreViewport{position:relative;min-height:0;overflow:hidden;background:radial-gradient(circle at 50% 44%,rgba(185,24,68,.14),transparent 34%),radial-gradient(circle at 50% 58%,rgba(112,10,39,.09),transparent 56%),#030203}
-  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(255,44,96,.34)) drop-shadow(0 0 30px rgba(161,18,61,.12)) saturate(1.32) contrast(1.08)}
-  .core-grid{position:absolute;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center,black 28%,transparent 84%)}
+  #coreViewport{position:relative;min-height:0;overflow:hidden;background:
+    radial-gradient(circle at 45% 42%,rgba(255,190,120,.075),transparent 16%),
+    radial-gradient(circle at 50% 44%,rgba(205,27,71,.20),transparent 35%),
+    radial-gradient(circle at 52% 58%,rgba(112,10,39,.11),transparent 60%),#020102}
+  #coreViewport::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,rgba(255,50,90,.035),transparent 24%,transparent 76%,rgba(255,186,116,.028));mix-blend-mode:screen}
+  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 10px rgba(255,52,92,.44)) drop-shadow(0 0 28px rgba(255,180,112,.10)) saturate(1.48) contrast(1.13) brightness(1.04)}
+  .core-grid{position:absolute;inset:0;pointer-events:none;opacity:.085;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center,black 28%,transparent 84%)}
   .core-overlay{position:absolute;inset:0;pointer-events:none;z-index:5}
   .core-status{position:absolute;left:15px;top:14px;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.14em;color:#d9c9cf}
   .core-status .pulse{width:7px;height:7px;background:var(--hot);border-radius:50%;box-shadow:0 0 13px rgba(255,61,103,.85);animation:blink 1.25s infinite}
   @keyframes blink{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
   .identity-card{position:absolute;left:15px;bottom:14px;width:min(290px,60%);border-left:2px solid var(--wine2);padding:8px 10px;background:linear-gradient(90deg,rgba(19,7,11,.72),transparent);backdrop-filter:blur(3px)}
-  .identity-name{font-size:10px;letter-spacing:.17em;color:var(--hot2);margin-bottom:5px}
+  .identity-name{font-size:10px;letter-spacing:.17em;color:#ffd0a0;margin-bottom:5px;text-shadow:0 0 12px rgba(255,194,122,.12)}
   .identity-copy{font-size:9px;line-height:1.55;color:var(--muted)}
   .neural-meter{position:absolute;right:15px;bottom:14px;width:120px;text-align:right}
   .meter-label{font-size:8px;color:var(--muted);letter-spacing:.12em;margin-bottom:5px}
@@ -123,11 +129,11 @@
 
   .footer{height:26px;border:1px solid rgba(127,30,56,.22);background:rgba(8,4,6,.76);display:flex;align-items:center;justify-content:space-between;padding:0 9px;font-size:8px;letter-spacing:.09em;color:var(--faint)}
   .footer strong{color:#a88d96;font-weight:600}
-  #audioHint{color:#d5a7b6;animation:hintPulse 2s infinite;cursor:pointer;pointer-events:auto}
-  @keyframes hintPulse{0%,100%{opacity:.52}50%{opacity:1}}
+  .silent-mode{color:#9b7b84;letter-spacing:.12em}
 
   .corner{position:absolute;width:13px;height:13px;z-index:8;pointer-events:none;opacity:.7}.corner.tl{left:5px;top:5px;border-left:1px solid var(--wine2);border-top:1px solid var(--wine2)}.corner.tr{right:5px;top:5px;border-right:1px solid var(--wine2);border-top:1px solid var(--wine2)}.corner.bl{left:5px;bottom:5px;border-left:1px solid var(--wine2);border-bottom:1px solid var(--wine2)}.corner.br{right:5px;bottom:5px;border-right:1px solid var(--wine2);border-bottom:1px solid var(--wine2)}
 
+  @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:980px){
     html,body{overflow:auto}.workspace{grid-template-columns:1fr;grid-template-rows:620px 760px}.kpis{grid-template-columns:repeat(2,1fr)}#app{height:auto;min-height:100vh}.system-line{display:none}.brand-sub{display:none}.decision-body{grid-template-columns:1fr}.decision-readout{display:none}
   }
