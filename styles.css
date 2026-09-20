@@ -77,12 +77,12 @@
 
   #corePanel{display:grid;grid-template-rows:52px 1fr;min-height:0}
   #coreViewport{position:relative;min-height:0;overflow:hidden;background:
-    radial-gradient(circle at 45% 42%,rgba(255,190,120,.075),transparent 16%),
-    radial-gradient(circle at 50% 44%,rgba(205,27,71,.20),transparent 35%),
-    radial-gradient(circle at 52% 58%,rgba(112,10,39,.11),transparent 60%),#020102}
+    radial-gradient(circle at 38% 39%,rgba(255,183,110,.085),transparent 18%),
+    radial-gradient(circle at 48% 44%,rgba(205,27,71,.14),transparent 38%),
+    radial-gradient(circle at 52% 58%,rgba(112,10,39,.08),transparent 62%),#020102}
   #coreViewport::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,rgba(255,50,90,.035),transparent 24%,transparent 76%,rgba(255,186,116,.028));mix-blend-mode:screen}
-  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(255,52,92,.28)) drop-shadow(0 0 18px rgba(255,180,112,.07)) saturate(1.24) contrast(1.08) brightness(.93)}
-  .core-grid{position:absolute;inset:0;pointer-events:none;opacity:.085;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center,black 28%,transparent 84%)}
+  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 7px rgba(255,58,92,.24)) drop-shadow(0 0 14px rgba(255,190,115,.08)) saturate(1.30) contrast(1.10) brightness(1.16)}
+  .core-grid{position:absolute;inset:0;pointer-events:none;opacity:.055;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center,black 28%,transparent 84%)}
   .core-overlay{position:absolute;inset:0;pointer-events:none;z-index:5}
   .core-status{position:absolute;left:15px;top:14px;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.14em;color:#d9c9cf}
   .core-status .pulse{width:7px;height:7px;background:var(--hot);border-radius:50%;box-shadow:0 0 13px rgba(255,61,103,.85);animation:blink 1.25s infinite}
