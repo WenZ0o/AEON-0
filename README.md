@@ -22,9 +22,9 @@ The project is intentionally autonomous after launch. There are no trading contr
 
 ## Features
 
-- Real-time **Three.js cortical neural field** with 1,800 rendered proxy nodes
-- **166,500.54 neural count** presented as the AEON-0 virtual cortical field
-- Dense synaptic lattice, long-range cortical arcs, hot synapse points and volumetric neural dust
+- Real-time **Three.js bilateral neural brain** with 1,860 rendered proxy nodes
+- **166,500.54 neural count** presented as the AEON-0 virtual bilateral brain field
+- Two hemispheres, a central fissure, dense synaptic lattice, warm neural pathways and volumetric neural dust
 - Autonomous synthetic **AEON / USD** market feed
 - Dynamic volatility, momentum and market regimes
 - Neural impulses linked to market movement
