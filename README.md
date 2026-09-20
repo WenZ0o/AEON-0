@@ -1,5 +1,13 @@
 # AEON-0 — Autonomous Intelligence Workstation
 
+<p align="center">
+  <img src="assets/aeon-0-hero.jpg" alt="AEON-0 Autonomous Intelligence Workstation" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://wenzo0o.github.io/AEON-0/"><strong>Launch AEON-0</strong></a>
+</p>
+
 AEON-0 is a browser-based audiovisual experiment that presents a synthetic trading system as a living digital organism.
 
 A pulsing Three.js connectome acts as the **Intelligence Core**. A continuously generated market feed creates volatility events, those events excite the neural structure, and the resulting activity moves through a visible decision pipeline before a simulated trade appears in the execution ledger.
@@ -80,11 +88,22 @@ AEON-0/
 │   ├── 40-chart.js
 │   ├── 50-trading.js
 │   └── 60-main.js
+├── assets/
+│   ├── aeon-0-hero.jpg
+│   ├── aeon-0-workstation.jpg
+│   └── aeon-0-social.jpg
 ├── README.md
 ├── LICENSE
 ├── .gitignore
 └── .nojekyll
 ```
+
+## Visual showcase
+
+<p align="center">
+  <img src="assets/aeon-0-workstation.jpg" alt="AEON-0 workstation interface" width="58%">
+  <img src="assets/aeon-0-social.jpg" alt="AEON-0 intelligence core" width="38%">
+</p>
 
 ## Technology
 
