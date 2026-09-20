@@ -74,8 +74,8 @@
   .panel-meta{font-size:8px;letter-spacing:.1em;color:var(--muted);text-align:right;line-height:1.55}
 
   #corePanel{display:grid;grid-template-rows:52px 1fr;min-height:0}
-  #coreViewport{position:relative;min-height:0;overflow:hidden;background:radial-gradient(circle at 50% 45%,rgba(120,18,47,.07),transparent 38%),#050304}
-  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(255,44,96,.22)) saturate(1.15)}
+  #coreViewport{position:relative;min-height:0;overflow:hidden;background:radial-gradient(circle at 50% 44%,rgba(185,24,68,.14),transparent 34%),radial-gradient(circle at 50% 58%,rgba(112,10,39,.09),transparent 56%),#030203}
+  #coreViewport canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(255,44,96,.34)) drop-shadow(0 0 30px rgba(161,18,61,.12)) saturate(1.32) contrast(1.08)}
   .core-grid{position:absolute;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center,black 28%,transparent 84%)}
   .core-overlay{position:absolute;inset:0;pointer-events:none;z-index:5}
   .core-status{position:absolute;left:15px;top:14px;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.14em;color:#d9c9cf}
