@@ -6,8 +6,6 @@
   let losses = 0;
   let tradeId = 0;
   let sessionStart = performance.now();
-  let audioCtx = null;
-  let audioArmed = false;
   let executing = false;
   let currentDecisionStage = -1;
   let lastTradeFlash = 0;
