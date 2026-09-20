@@ -4,7 +4,6 @@
   function setStep(index){
     currentDecisionStage=index;
     steps.forEach((s,i)=>s.className='step '+(i<index?'complete':i===index?'active':''));
-    if(typeof playDecisionPulse==='function') playDecisionPulse(index);
   }
   function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
@@ -63,7 +62,6 @@
     addLedgerRow({id:tradeId,asset,side,capital,leverage,win,pnl});
     updateKPIs();
     fireNeuralBurst(win?1.62:1.38);
-    playTradeSound(win);
   }
 
   function addLedgerRow(t){
