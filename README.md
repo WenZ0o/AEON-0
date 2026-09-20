@@ -18,11 +18,13 @@ A pulsing Three.js connectome acts as the **Intelligence Core**. A continuously 
 
 **Market movement → Neural impulse → Signal analysis → Risk review → Position sizing → Simulated execution → Settlement → Equity update**
 
-The project is intentionally autonomous after launch. There are no trading controls. The only optional interaction is a single click that unlocks Web Audio in browsers that block autoplay audio.
+The project is intentionally autonomous after launch. There are no trading controls. AEON-0 runs silently by design; the experience is fully visual and autonomous after launch.
 
 ## Features
 
-- Real-time **Three.js neural connectome / crystal core**
+- Real-time **Three.js cortical neural field** with 1,800 rendered proxy nodes
+- **166,500.54 neural count** presented as the AEON-0 virtual cortical field
+- Dense synaptic lattice, long-range cortical arcs, hot synapse points and volumetric neural dust
 - Autonomous synthetic **AEON / USD** market feed
 - Dynamic volatility, momentum and market regimes
 - Neural impulses linked to market movement
@@ -37,7 +39,6 @@ The project is intentionally autonomous after launch. There are no trading contr
 - Autonomous LONG / SHORT bias
 - Dynamic position sizing and leverage
 - Win/loss settlements with live PnL updates
-- Web Audio neural clicks, execution tones and settlement sounds
 - Dark wine-red / black cyber-workstation interface
 - Responsive single-page layout
 - No build process and no package installation
@@ -47,8 +48,7 @@ The project is intentionally autonomous after launch. There are no trading contr
 1. Download or clone the repository.
 2. Open `index.html` in Chrome, Edge or Firefox.
 3. Keep an internet connection available so Three.js can load from the CDN.
-4. Click once anywhere in the interface if you want audio.
-5. AEON-0 runs autonomously from that point onward.
+4. AEON-0 runs autonomously from that point onward.
 
 You can also use a tiny local server if your browser applies stricter `file://` policies:
 
@@ -82,7 +82,6 @@ AEON-0/
 ├── styles.css
 ├── js/
 │   ├── 00-base.js
-│   ├── 10-audio.js
 │   ├── 20-core.js
 │   ├── 30-market.js
 │   ├── 40-chart.js
@@ -124,7 +123,7 @@ Reloading the page starts a new session from the configured starting capital.
 
 ## Browser notes
 
-For best results, use a recent desktop version of Chrome or Edge with hardware acceleration enabled. WebGL is required for the 3D intelligence core. Audio requires a one-time user gesture because modern browsers block automatic audio playback.
+For best results, use a recent desktop version of Chrome or Edge with hardware acceleration enabled. WebGL is required for the 3D intelligence core. The experience is intentionally silent; no audio subsystem is loaded.
 
 ## License
 
