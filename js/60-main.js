@@ -1,24 +1,22 @@
-// ---------- MAIN ANIMATION V4 ----------
+// ---------- MAIN ANIMATION V5 ----------
 const clock=new THREE.Clock();
 
 function updateCore(t,dt){
-  neuralTension=clamp(neuralTension-dt*.0075,0,1);
-  burstEnergy*=.953;
+  neuralTension=clamp(neuralTension-dt*.007,0,1);
+  burstEnergy*=.954;
 
-  const breathe=1+Math.sin(t*.78)*.0045+Math.sin(t*.31)*.003;
-  const activity=neuralTension*.018+burstEnergy*.010;
+  const breathe=1+Math.sin(t*.74)*.004+Math.sin(t*.29)*.0025;
+  const activity=neuralTension*.014+burstEnergy*.008;
 
   for(let i=0;i<NODE_COUNT;i++){
     const b=baseNodes[i];
     const radial=nodeRadials[i];
     const layer=nodeLayer[i]||0;
-    const wave=(Math.sin(t*1.1+i*.097)*(.0035+neuralTension*.0045))*(
-      layer===2?1.55:layer===1?1.16:1
-    );
+    const wave=Math.sin(t*1.02+i*.091)*(.0028+neuralTension*.0036)*(layer===2?1.5:layer===1?1.14:1);
 
     currentNodes[i]
       .copy(b)
-      .multiplyScalar(breathe+activity+wave*.06)
+      .multiplyScalar(breathe+activity+wave*.045)
       .addScaledVector(radial,wave);
 
     nodePositions[i*3]=currentNodes[i].x;
@@ -29,9 +27,7 @@ function updateCore(t,dt){
 
   for(let i=0;i<HOT_COUNT;i++){
     const p=currentNodes[hotIndices[i]];
-    hotPositions[i*3]=p.x;
-    hotPositions[i*3+1]=p.y;
-    hotPositions[i*3+2]=p.z;
+    hotPositions[i*3]=p.x;hotPositions[i*3+1]=p.y;hotPositions[i*3+2]=p.z;
   }
   hotGeo.attributes.position.needsUpdate=true;
 
@@ -53,12 +49,11 @@ function updateCore(t,dt){
 
   for(let i=neuralSignals.length-1;i>=0;i--){
     const s=neuralSignals[i],edge=edges[s.edgeIndex];
-    const a=currentNodes[edge[s.reverse?1:0]];
-    const b=currentNodes[edge[s.reverse?0:1]];
-    s.t+=s.speed*(1+neuralTension*.62);
+    const a=currentNodes[edge[s.reverse?1:0]],b=currentNodes[edge[s.reverse?0:1]];
+    s.t+=s.speed*(1+neuralTension*.58);
     s.mesh.position.lerpVectors(a,b,s.t);
     const q=Math.sin(Math.min(1,s.t)*Math.PI);
-    s.mesh.scale.setScalar(.38+q*.92);
+    s.mesh.scale.setScalar(.36+q*.88);
     if(s.t>=1){
       coreGroup.remove(s.mesh);
       s.mesh.material.dispose();
@@ -73,8 +68,8 @@ function updateCore(t,dt){
     m.end.lerp(target,.16);
     const u=clamp(m.t,0,1);
     m.mesh.position.lerpVectors(m.start,m.end,u);
-    m.mesh.position.y+=Math.sin(u*Math.PI)*.22;
-    m.mesh.scale.setScalar(.66+Math.sin(u*Math.PI)*.74);
+    m.mesh.position.y+=Math.sin(u*Math.PI)*.20;
+    m.mesh.scale.setScalar(.62+Math.sin(u*Math.PI)*.70);
     if(u>=1){
       fireNeuralBurst(m.energy);
       coreGroup.remove(m.mesh);
@@ -83,38 +78,39 @@ function updateCore(t,dt){
     }
   }
 
-  coreGroup.rotation.y=-.66+Math.sin(t*.085)*.055;
-  coreGroup.rotation.x=.02+Math.sin(t*.12)*.018;
-  coreGroup.rotation.z=-.015+Math.sin(t*.06)*.006;
+  coreGroup.rotation.y=-.10+Math.sin(t*.07)*.025;
+  coreGroup.rotation.x=.01+Math.sin(t*.11)*.009;
+  coreGroup.rotation.z=Math.sin(t*.05)*.004;
 
-  arcGroup.rotation.y=Math.sin(t*.055)*.012;
-  dustCloud.rotation.y+=dt*.004;
-  dustCloud.rotation.z-=dt*.0015;
+  arcGroup.rotation.y=Math.sin(t*.05)*.010;
 
-  nodeMat.size=.034+neuralTension*.009+burstEnergy*.002;
-  haloMat.opacity=.065+neuralTension*.055;
-  edgeMat.opacity=.052+neuralTension*.050+burstEnergy*.012;
-  warmMat.opacity=.055+neuralTension*.065+burstEnergy*.014;
-  hotMat.opacity=.54+neuralTension*.20+Math.sin(t*1.55)*.025;
-  dustMat.opacity=.12+neuralTension*.065;
+  nodeMat.size=.044+neuralTension*.010+burstEnergy*.003;
+  nodeMat.opacity=.90+neuralTension*.06;
+  haloMat.opacity=.07+neuralTension*.06;
+  edgeMat.opacity=.145+neuralTension*.075+burstEnergy*.018;
+  warmMat.opacity=.105+neuralTension*.085+burstEnergy*.020;
+  hotMat.opacity=.62+neuralTension*.20+Math.sin(t*1.5)*.025;
 
-  const eyePulse=.82+Math.sin(t*1.35)*.08+neuralTension*.10;
-  eyeSprite.material.opacity=clamp(eyePulse,.65,1);
-  eyeCore.material.opacity=.84+Math.sin(t*2.1)*.08;
-  const eyeScale=.20+neuralTension*.035+Math.sin(t*1.35)*.008;
+  const eyePulse=.82+Math.sin(t*1.2)*.07+neuralTension*.10;
+  eyeSprite.material.opacity=clamp(eyePulse,.72,1);
+  eyeCore.material.opacity=.90+Math.sin(t*2.0)*.05;
+  const eyeScale=.15+neuralTension*.025+Math.sin(t*1.2)*.006;
   eyeSprite.scale.set(eyeScale,eyeScale,1);
 
-  profileMat.opacity=.18+neuralTension*.08;
-  jawLine.material.opacity=.075+neuralTension*.04;
+  profileLine.material.opacity=.34+neuralTension*.10;
+  browLine.material.opacity=.17+neuralTension*.07;
+  eyeLine.material.opacity=.23+neuralTension*.08;
+  lipLine.material.opacity=.14+neuralTension*.05;
+  jawLine.material.opacity=.13+neuralTension*.05;
 
-  keyLight.intensity=4.4+neuralTension*3.4+burstEnergy*1.1;
-  warmLight.intensity=3.0+neuralTension*2.0+burstEnergy*.7;
-  rimLight.intensity=2.2+neuralTension*1.7;
+  keyLight.intensity=4.8+neuralTension*2.8+burstEnergy*.8;
+  warmLight.intensity=4.1+neuralTension*2.4+burstEnergy*.8;
+  rimLight.intensity=2.6+neuralTension*1.5;
 
-  camera.position.x=Math.sin(t*.05)*.055;
-  camera.position.y=.02+Math.cos(t*.08)*.028;
-  camera.position.z=7.7+Math.sin(t*.04)*.045;
-  camera.lookAt(0,-.04,0);
+  camera.position.x=Math.sin(t*.045)*.035;
+  camera.position.y=Math.cos(t*.07)*.020;
+  camera.position.z=7.4+Math.sin(t*.035)*.035;
+  camera.lookAt(-.05,.10,0);
 
   $('neuralFill').style.width=(neuralTension*100).toFixed(0)+'%';
   $('neuralValue').textContent=(neuralTension*100).toFixed(0)+'%';
@@ -139,16 +135,16 @@ function animate(){
 animate();
 
 setInterval(()=>{
-  const count=1+(Math.random()<.28?1:0);
+  const count=1+(Math.random()<.36?1:0);
   for(let i=0;i<count;i++){
-    const energy=.24+market.volatility*.30+Math.random()*.24;
+    const energy=.28+market.volatility*.32+Math.random()*.26;
     spawnNeuralSignal(Math.floor(random(0,edges.length)),energy);
   }
-},190);
+},160);
 
 setInterval(()=>{
-  if(!executing&&Math.random()<.48)fireNeuralBurst(random(.20,.46));
-},1900);
+  if(!executing&&Math.random()<.52)fireNeuralBurst(random(.22,.50));
+},1800);
 
 const idleStates=[
   'ANALYZING MARKET...',
